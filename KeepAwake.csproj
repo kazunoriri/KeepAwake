@@ -8,6 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>KeepAwake</AssemblyName>
     <RootNamespace>KeepAwake</RootNamespace>
+    <ApplicationIcon>KeepAwake.ico</ApplicationIcon>
+
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>KeepAwake</Product>
   </PropertyGroup>
 
 </Project>

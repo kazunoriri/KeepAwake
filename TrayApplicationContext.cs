@@ -37,7 +37,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
         _notifyIcon = new NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!)
+                   ?? SystemIcons.Application,
             Text = "KeepAwake - ロック防止中",
             ContextMenuStrip = menu,
             Visible = true
