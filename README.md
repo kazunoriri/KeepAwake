@@ -20,6 +20,14 @@ GitHub Releasesから最新版の `KeepAwake.exe` をダウンロードしてく
 
 .NETを別途インストールする必要はありません。
 
+### ファイルサイズについて
+
+`KeepAwake.exe` は約110MBあります。
+
+これは、.NETがインストールされていないWindows PCでも `KeepAwake.exe` 単体で動作できるよう、.NETランタイムを実行ファイルに含めて配布しているためです。
+
+KeepAwake本体のプログラムが110MBあるわけではありません。
+
 ## 使い方
 
 `KeepAwake.exe` を起動します。
