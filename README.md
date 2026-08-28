@@ -1,47 +1,97 @@
 # KeepAwake
 
-Windows 10 / 11 向けの小さなタスクトレイ常駐アプリです。
-起動中、30秒ごとにごく小さなマウス移動イベントをWindowsへ送信し、無操作によるロック画面への遷移を防ぎます。
+KeepAwakeは、Windowsの無操作によるロックを防止するシンプルなタスクトレイ常駐アプリです。
 
-## 動かし方
+起動中は30秒ごとにごく小さなマウス移動イベントをWindowsへ送信します。
+マウスポインターは元の位置に戻るため、通常の操作を邪魔しません。
 
-VS Codeでこのフォルダを開き、ターミナルで:
+## 特徴
+
+- インストール不要
+- 管理者権限不要
+- タスクトレイに常駐
+- ワンクリックでロック防止をON / OFF
+- Windows起動時の自動起動に対応
+- Windowsのグループポリシーやセキュリティ設定を変更しない
+
+## ダウンロード
+
+GitHub Releasesから最新版の `KeepAwake.exe` をダウンロードしてください。
+
+.NETを別途インストールする必要はありません。
+
+## 使い方
+
+`KeepAwake.exe` を起動します。
+
+通常のウィンドウは表示されず、タスクトレイにKeepAwakeのアイコンが表示されます。
+
+アイコンを右クリックすると、次の操作ができます。
+
+- **ロックを防止する**  
+  ロック防止機能のON / OFF
+
+- **Windows起動時に開始**  
+  Windowsへのサインイン時にKeepAwakeを自動起動
+
+- **終了**  
+  KeepAwakeを終了
+
+タスクトレイアイコンをダブルクリックしても、ロック防止のON / OFFを切り替えられます。
+
+起動時は「ロックを防止する」がONになっています。
+
+## 自動起動について
+
+「Windows起動時に開始」を使用する場合は、`KeepAwake.exe` を今後移動しない場所に置いてからONにしてください。
+
+自動起動設定後にexeを別のフォルダへ移動した場合は、新しい場所からKeepAwakeを起動し、一度自動起動をOFFにしてから再度ONにしてください。
+
+## 動作環境
+
+- Windows 10
+- Windows 11
+- x64
+
+## 注意事項
+
+KeepAwakeはWindowsのグループポリシーやセキュリティ設定そのものを変更しません。
+
+組織で管理されているPCなどでは、セキュリティポリシーによって疑似入力がユーザー操作として扱われず、ロックを防止できない場合があります。
+
+また、初回起動時にWindows SmartScreenの警告が表示される場合があります。
+
+## 開発者向け
+
+### 必要環境
+
+- .NET 10 SDK
+- Windows 10 / 11
+
+### 実行
 
 ```powershell
 dotnet run
 ```
 
-起動すると通常ウィンドウは表示されず、タスクトレイに常駐します。
-タスクトレイアイコンを右クリックすると以下を操作できます。
-
-- ロックを防止する
-- Windows起動時に開始
-- 終了
-
-タスクトレイアイコンをダブルクリックすると、ロック防止のON/OFFを切り替えます。
-
-## Releaseビルド
+### ビルド
 
 ```powershell
 dotnet build -c Release
 ```
 
-## .NETが入っていないPCでも動く単体配布用ビルド例
-
-Windows x64:
+### 単体配布用ビルド
 
 ```powershell
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None
 ```
 
-生成物は通常、次の下にできます。
+生成物:
 
 ```text
 bin\Release\net10.0-windows\win-x64\publish\
 ```
 
-## 注意
+## License
 
-- Windowsのグループポリシーや組織のセキュリティ設定そのものを書き換えません。
-- 組織管理PCでは、ポリシーによって疑似入力がロック防止として扱われない場合があります。
-- 現在のアイコンはWindows標準アイコンです。
+MIT License
