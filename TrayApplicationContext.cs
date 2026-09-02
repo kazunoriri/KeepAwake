@@ -5,6 +5,7 @@ namespace KeepAwake;
 internal sealed class TrayApplicationContext : ApplicationContext
 {
     private static readonly TimeSpan ActivityInterval = TimeSpan.FromSeconds(30);
+    private static readonly string TestLogPath = Path.Combine(Path.GetTempPath(), "KeepAwake-test.log");
 
     private readonly NotifyIcon _notifyIcon;
     private readonly System.Windows.Forms.Timer _timer;
@@ -15,6 +16,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
     public TrayApplicationContext()
     {
+        Log("Application started");
+
         _preventLockItem = new ToolStripMenuItem("ロックを防止する")
         {
             Checked = true,
@@ -64,6 +67,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     {
         _preventLock = enabled;
         _preventLockItem.Checked = enabled;
+        Log($"Prevent lock {(enabled ? "enabled" : "disabled")}");
         UpdateTimerState();
     }
 
@@ -77,11 +81,13 @@ internal sealed class TrayApplicationContext : ApplicationContext
         if (e.Reason == SessionSwitchReason.SessionLock)
         {
             _sessionLocked = true;
+            Log("Session locked");
             UpdateTimerState();
         }
         else if (e.Reason == SessionSwitchReason.SessionUnlock)
         {
             _sessionLocked = false;
+            Log("Session unlocked");
             UpdateTimerState();
         }
     }
@@ -108,7 +114,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
         if (!_preventLock || _sessionLocked)
             return;
 
-        NativeMethods.SendTinyMouseMove();
+        var sent = NativeMethods.SendTinyMouseMove();
+        Log(sent ? "Mouse input sent" : "Mouse input failed");
     }
 
     private void StartupItem_CheckedChanged(object? sender, EventArgs e)
@@ -131,8 +138,23 @@ internal sealed class TrayApplicationContext : ApplicationContext
         }
     }
 
+    private static void Log(string message)
+    {
+        try
+        {
+            File.AppendAllText(
+                TestLogPath,
+                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}{Environment.NewLine}");
+        }
+        catch
+        {
+            // テスト用ログの失敗で本体動作を止めない。
+        }
+    }
+
     private void ExitApplication()
     {
+        Log("Application exiting");
         SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
         _timer.Stop();
         _notifyIcon.Visible = false;
