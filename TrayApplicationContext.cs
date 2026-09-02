@@ -1,3 +1,5 @@
+using Microsoft.Win32;
+
 namespace KeepAwake;
 
 internal sealed class TrayApplicationContext : ApplicationContext
@@ -9,6 +11,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly ToolStripMenuItem _preventLockItem;
     private readonly ToolStripMenuItem _startupItem;
     private bool _preventLock = true;
+    private bool _sessionLocked;
 
     public TrayApplicationContext()
     {
@@ -51,17 +54,41 @@ internal sealed class TrayApplicationContext : ApplicationContext
             Interval = (int)ActivityInterval.TotalMilliseconds
         };
         _timer.Tick += (_, _) => KeepActive();
-        _timer.Start();
 
-        KeepActive();
+        SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+
+        UpdateTimerState();
     }
 
     private void SetPreventLock(bool enabled)
     {
         _preventLock = enabled;
         _preventLockItem.Checked = enabled;
+        UpdateTimerState();
+    }
 
-        if (enabled)
+    private void TogglePreventLock()
+    {
+        SetPreventLock(!_preventLock);
+    }
+
+    private void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+        if (e.Reason == SessionSwitchReason.SessionLock)
+        {
+            _sessionLocked = true;
+            UpdateTimerState();
+        }
+        else if (e.Reason == SessionSwitchReason.SessionUnlock)
+        {
+            _sessionLocked = false;
+            UpdateTimerState();
+        }
+    }
+
+    private void UpdateTimerState()
+    {
+        if (_preventLock && !_sessionLocked)
         {
             _timer.Start();
             KeepActive();
@@ -70,18 +97,15 @@ internal sealed class TrayApplicationContext : ApplicationContext
         else
         {
             _timer.Stop();
-            _notifyIcon.Text = "KeepAwake - 停止中";
+            _notifyIcon.Text = _sessionLocked && _preventLock
+                ? "KeepAwake - ロック中"
+                : "KeepAwake - 停止中";
         }
-    }
-
-    private void TogglePreventLock()
-    {
-        SetPreventLock(!_preventLock);
     }
 
     private void KeepActive()
     {
-        if (!_preventLock)
+        if (!_preventLock || _sessionLocked)
             return;
 
         NativeMethods.SendTinyMouseMove();
@@ -109,6 +133,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
     private void ExitApplication()
     {
+        SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
         _timer.Stop();
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
